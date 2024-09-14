@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error, path::PathBuf};
 
 use clap::Parser;
 use serde::{Deserialize, Serialize};
@@ -15,12 +15,8 @@ struct DiscordBuildInfo {
 #[command(author, about)]
 struct Args {
     version: String,
-    #[arg(
-        short,
-        long,
-        default_value_t = String::from("/opt/discord/resources/build_info.json"),
-    )]
-    path: String,
+    #[arg(short, long, default_value = "/opt/discord/resources/build_info.json")]
+    path: PathBuf,
 }
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
@@ -28,7 +24,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let build_info_json = match std::fs::read_to_string(&args.path) {
         Ok(info) => info,
         Err(err) => {
-            return Err(format!("Error while reading {file}: {err:?}", file = args.path).into())
+            return Err(format!(
+                "Error while reading {file}: {err:?}",
+                file = args.path.display()
+            )
+            .into())
         }
     };
 
